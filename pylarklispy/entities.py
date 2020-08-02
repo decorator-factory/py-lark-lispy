@@ -214,10 +214,10 @@ class SExpr(Entity):
         return f"<SExpr {self.es}>"
 
 
-class Vector(Entity):
+class Vector(Entity, Generic[E]):
     __slots__ = ("es", "_computed")
 
-    def __init__(self, *es: Entity, _computed: int = 0):
+    def __init__(self, *es: E, _computed: int = 0):
         self.es = es
         self._computed = _computed
 
