@@ -19,7 +19,7 @@ class Entity:
         return True
 
     def fmap(self, f: Callable[["Entity"], "Entity"]) -> "Entity":
-        return self
+        return f(self)
 
     def compute(self, runtime: Runtime) -> "Entity":
         return self
