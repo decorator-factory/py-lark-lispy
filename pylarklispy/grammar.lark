@@ -3,7 +3,7 @@ start: s_expr*
 expr: integer
     | string
     | atom
-    | sigil_strings
+    | sigil_string
     | name
     | s_expr
     | vector
