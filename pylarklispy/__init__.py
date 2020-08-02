@@ -11,7 +11,7 @@ def run_ast(
         runtime: Optional[entities.Runtime]=None
         ) -> Tuple[entities.Entity, entities.Runtime]:
     runtime = runtime or entities.Runtime(bif.index)
-    result = entities.Atom("None")
+    result = entities.Atom("Nil")
     for statement in statements:
         result = statement.evaluate(runtime)
     return (result, runtime)
