@@ -1,4 +1,5 @@
-from typing import Callable, Mapping, Optional, Tuple, Literal
+from typing import Callable, Dict, Mapping, Optional, Tuple, Literal
+
 """
 This module contains the classes that represent all the language
 entities like S-Expr, Integer etc.
@@ -6,9 +7,57 @@ entities like S-Expr, Integer etc.
 An entity is an internal representation of a value or a computation.
 """
 
-
-Runtime = Mapping[str, "Entity"]
 EvaluationStatus = Tuple[Literal["full", "partial"], "Entity"]
+
+
+class StackFrame:
+    __slots__ = ("parent", "depth", "caller")
+
+    def __init__(self, parent: Optional["StackFrame"], depth: int, caller: str, names: Dict[str, "Entity"]):
+        self.parent = parent
+        self.depth = depth
+        self.caller = caller
+        self.names = names
+
+    def lookup(self, name: str, *, trace: Tuple["StackFrame", ...] = ()):
+        if name in self.names:
+            return self.names[name]
+        if self.parent is None:
+            raise KeyError(name, trace)
+        return self.parent.lookup(name, trace=trace + (self,))
+
+    def insert(self, name: str, value: "Entity", *, depth: int = 0):
+        if depth < 0:
+            raise LookupError(f"depth ({depth}) cannot be negative")
+        if depth == 0:
+            self.names[name] = value
+        if self.parent is None:
+            raise LookupError("Cannot go further; already in global scope")
+        self.parent.insert(name, value, depth=depth-1)
+
+
+class Runtime:
+    def __init__(self, built_ins: Mapping[str, "Entity"]):
+        self.global_names = dict(built_ins)
+        self.global_frame = StackFrame(
+            parent=None,
+            depth=0,
+            caller="<global>",
+            names=self.global_names
+        )
+        self.stack = [self.global_frame]
+
+    def __getitem__(self, name: str) -> "Entity":
+        return self.stack[-1].lookup(name)
+
+    def push(self, frame: StackFrame):
+        self.stack.append(frame)
+
+    def pop(self):
+        if len(self.stack) == 1:
+            raise LookupError("Popping the global stack frame")
+        return self.stack.pop()
+
 
 class Entity:
     @property
