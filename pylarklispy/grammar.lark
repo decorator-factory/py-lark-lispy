@@ -1,4 +1,4 @@
-start: s_expr*
+start: expr*
 
 ?expr: integer
     | string

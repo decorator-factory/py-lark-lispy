@@ -2,12 +2,12 @@ import lark
 from typing import Iterable, List, Optional, Tuple
 from . import parser, entities, bif
 
-def compile_code(code: str) -> List[entities.SExpr]:
+def compile_code(code: str) -> List[entities.Entity]:
     tree = parser.parser.parse(code)
     return parser.Transformer().transform(tree)
 
 def run_ast(
-        statements: Iterable[entities.SExpr], *,
+        statements: Iterable[entities.Entity], *,
         runtime: Optional[entities.Runtime]=None
         ) -> Tuple[entities.Entity, entities.Runtime]:
     runtime = runtime or entities.Runtime(bif.index)
