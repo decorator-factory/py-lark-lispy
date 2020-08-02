@@ -59,6 +59,11 @@ class Integer(Entity):
     def __init__(self, n: int):
         self.n = n
 
+    def __eq__(self, other):
+        if not isinstance(other, Integer):
+            return False
+        return self.n == other.n
+
     def __str__(self):
         return str(self.n)
 
@@ -69,6 +74,11 @@ class Integer(Entity):
 class String(Entity):
     def __init__(self, s: str):
         self.s = s
+
+    def __eq__(self, other):
+        if not isinstance(other, String):
+            return False
+        return self.s == other.s
 
     def __str__(self):
         return repr(self.s)
@@ -81,6 +91,11 @@ class Atom(Entity):
     def __init__(self, s: str):
         self.s = s
 
+    def __eq__(self, other):
+        if not isinstance(other, Atom):
+            return False
+        return self.s == other.s
+
     def __str__(self):
         return f":{self.s}"
 
@@ -92,6 +107,11 @@ class Quoted(Entity):
     def __init__(self, e: Entity):
         self.e = e
 
+    def __eq__(self, other):
+        if not isinstance(other, Quoted):
+            return False
+        return self.e == other.e
+
     def __str__(self):
         return f"&{self.e}"
 
@@ -100,10 +120,15 @@ class Quoted(Entity):
 
 
 class SExpr(Entity):
+    is_threadsafe = False
+
     def __init__(self, *es: Entity):
         self.es = es
 
-    is_threadsafe = False
+    def __eq__(self, other):
+        if not isinstance(other, SExpr):
+            return False
+        return self.es == other.es
 
     def compute(self, runtime: Runtime) -> Entity:
         raise NotImplementedError # TODO
@@ -123,6 +148,11 @@ class Vector(Entity):
     def is_threadsafe(self):
         return all(e.is_threadsafe for e in self.es)
 
+    def __eq__(self, other):
+        if not isinstance(other, Vector):
+            return False
+        return self.es == other.es
+
     def compute(self, runtime: Runtime) -> Entity:
         raise NotImplementedError # TODO
 
@@ -139,6 +169,11 @@ class Name(Entity):
     def __init__(self, identifier: str):
         self.identifier = identifier
 
+    def __eq__(self, other):
+        if not isinstance(other, Name):
+            return False
+        return self.identifier == other.identifier
+
     def compute(self, runtime: Runtime) -> Entity:
         return runtime[self.identifier]
 
@@ -153,6 +188,11 @@ class SigilString(Entity):
     def __init__(self, sigil: str, string: str):
         self.sigil = sigil
         self.string = string
+
+    def __eq__(self, other):
+        if not isinstance(other, SigilString):
+            return False
+        return (self.sigil, self.string) == (other.sigil, other.string)
 
     @property
     def sigil_function_name(self) -> str:
