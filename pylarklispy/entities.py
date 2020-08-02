@@ -342,7 +342,7 @@ class Function(Entity):
         if self.lazy:
             computed_args = [Quoted(arg) for arg in args]
         else:
-            computed_args = [arg.compute(runtime) for arg in args]
+            computed_args = [arg.evaluate(runtime) for arg in args]
 
         if self.closure is not None:
             runtime.push(self.closure)
