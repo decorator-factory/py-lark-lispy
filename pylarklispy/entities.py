@@ -280,7 +280,7 @@ class Name(Entity):
         return self.identifier
 
     def __repr__(self):
-        return "<Name {self.identifier}>"
+        return f"<Name {self.identifier}>"
 
 
 class SigilString(Entity):
