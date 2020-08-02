@@ -1,0 +1,31 @@
+start: s_expr*
+
+expr: integer
+    | string
+    | atom
+    | sigil_strings
+    | name
+    | s_expr
+    | vector
+    | quoted
+
+quoted: "&" expr
+s_expr: "(" expr* ")"
+vector: "[" expr* "]"
+
+string: ESCAPED_STRING
+atom: ":" IDENTIFIER
+name: IDENTIFIER
+
+
+IDENTIFIER: /(?![-0-9])[-+*\/%=<>_a-zA-Z0-9]+/
+
+COMMENT: /#.*$/
+COMMA: ","
+
+%import common.WS
+%ignore WS
+%ignore COMMENT
+%ignore COMMA
+
+%import common.ESCAPED_STRING
