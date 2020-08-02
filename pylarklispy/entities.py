@@ -114,6 +114,9 @@ class Quoted(Entity):
     def __init__(self, e: Entity):
         self.e = e
 
+    def fmap(self, f):
+        return Quoted(self.e.fmap(f))
+
     def __eq__(self, other):
         if not isinstance(other, Quoted):
             return False
@@ -133,6 +136,9 @@ class SExpr(Entity):
 
     def __init__(self, *es: Entity):
         self.es = es
+
+    def fmap(self, f):
+        return SExpr(*(e.fmap(f) for e in self.es))
 
     def __eq__(self, other):
         if not isinstance(other, SExpr):
@@ -155,6 +161,9 @@ class Vector(Entity):
     def __init__(self, *es: Entity, _computed: int = 0):
         self.es = es
         self._computed = _computed
+
+    def fmap(self, f):
+        return Vector(*(e.fmap(f) for e in self.es), _computed=0)
 
     @property
     def is_threadsafe(self):
