@@ -56,6 +56,8 @@ class Entity:
 
 
 class Integer(Entity):
+    __slots__ = ("n",)
+
     def __init__(self, n: int):
         self.n = n
 
@@ -72,6 +74,8 @@ class Integer(Entity):
 
 
 class String(Entity):
+    __slots__ = ("s",)
+
     def __init__(self, s: str):
         self.s = s
 
@@ -88,6 +92,8 @@ class String(Entity):
 
 
 class Atom(Entity):
+    __slots__ = ("s",)
+
     def __init__(self, s: str):
         self.s = s
 
@@ -104,6 +110,8 @@ class Atom(Entity):
 
 
 class Quoted(Entity):
+    __slots__ = ("e",)
+
     def __init__(self, e: Entity):
         self.e = e
 
@@ -120,6 +128,8 @@ class Quoted(Entity):
 
 
 class SExpr(Entity):
+    __slots__ = ("es",)
+
     is_threadsafe = False
 
     def __init__(self, *es: Entity):
@@ -141,6 +151,8 @@ class SExpr(Entity):
 
 
 class Vector(Entity):
+    __slots__ = ("es",)
+
     def __init__(self, *es: Entity):
         self.es = es
 
@@ -164,6 +176,8 @@ class Vector(Entity):
 
 
 class Name(Entity):
+    __slots__ = ("identifier",)
+
     is_threadsafe = False
 
     def __init__(self, identifier: str):
@@ -185,6 +199,8 @@ class Name(Entity):
 
 
 class SigilString(Entity):
+    __slots__ = ("sigil", "string")
+
     is_threadsafe = False
 
     def __init__(self, sigil: str, string: str):
