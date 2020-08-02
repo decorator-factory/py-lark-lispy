@@ -1,4 +1,4 @@
-from typing import Callable, Mapping, Tuple, Literal
+from typing import Callable, Mapping, Optional, Tuple, Literal
 """
 This module contains the classes that represent all the language
 entities like S-Expr, Integer etc.
@@ -9,7 +9,6 @@ An entity is an internal representation of a value or a computation.
 
 Runtime = Mapping[str, "Entity"]
 EvaluationStatus = Tuple[Literal["full", "partial"], "Entity"]
-
 
 class Entity:
     @property
@@ -151,10 +150,11 @@ class SExpr(Entity):
 
 
 class Vector(Entity):
-    __slots__ = ("es",)
+    __slots__ = ("es", "_computed")
 
-    def __init__(self, *es: Entity):
+    def __init__(self, *es: Entity, _computed: int = 0):
         self.es = es
+        self._computed = _computed
 
     @property
     def is_threadsafe(self):
@@ -165,8 +165,26 @@ class Vector(Entity):
             return False
         return self.es == other.es
 
-    def compute(self, runtime: Runtime) -> Entity:
-        raise NotImplementedError # TODO
+    def compute(self, runtime: Runtime) -> "Vector":
+        if self._computed == len(self.es):
+            return self
+        # compute a new iteration
+        new_es = []
+        computed = 0
+        for e in self.es:
+            next_e = e.compute(runtime)
+            if next_e is e:
+                computed += 1
+            new_es.append(next_e)
+        return Vector(*new_es, _computed=computed)
+
+    def evaluate(self, runtime: Runtime) -> "Vector":
+        # if we just want the result, there's no need
+        # to do a billion `compute`s
+        return Vector(
+            *(e.compute(runtime) for e in self.es),
+            _computed=len(self.es)
+        )
 
     def __str__(self):
         return "[" + " ".join(map(str, self.es)) + "]"
