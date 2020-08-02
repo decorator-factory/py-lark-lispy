@@ -185,6 +185,8 @@ class Name(Entity):
 
 
 class SigilString(Entity):
+    is_threadsafe = False
+
     def __init__(self, sigil: str, string: str):
         self.sigil = sigil
         self.string = string
