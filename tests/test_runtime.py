@@ -33,3 +33,44 @@ def test_builtin_function3():
     runtime = Runtime({"+": add, "one": Integer(1), "two": Integer(2)})
     expr = SExpr(Name("+"), Name("one"), Name("two"))
     assert expr.evaluate(runtime) == Integer(3)
+
+
+def test_custom_identity_function():
+    runtime = Runtime({})
+    runtime.global_names["f"] =\
+        create_function(runtime, "f", ["x"], Name("x"))
+    expr = SExpr(Name("f"), Integer(42))
+    assert expr.evaluate(runtime) == Integer(42)
+
+
+def test_namespace_containment():
+    runtime = Runtime({"x": Integer(1024)})
+    runtime.global_names["f"] =\
+        create_function(runtime, "f", ["x"], Name("x"))
+    expr = SExpr(Name("f"), Integer(42))
+    assert expr.evaluate(runtime) == Integer(42)
+    assert runtime.global_names["x"] == Integer(1024)
+
+
+def test_custom_double_function():
+    runtime = Runtime({})
+    runtime.global_names["f"] =\
+        create_function(runtime, "f", ["x"], SExpr(Name("+"), Name("x"), Name("x")))
+    runtime.global_names["+"] =\
+        Function("+", (lambda r, a, b: Integer(a.n + b.n)))
+    expr = SExpr(Name("f"), Integer(21))
+    assert expr.evaluate(runtime) == Integer(42)
+
+
+def test_custom_double_sum_function():
+    runtime = Runtime({})
+    runtime.global_names["double"] =\
+        create_function(runtime, "double", ["x"], SExpr(Name("+"), Name("x"), Name("x")))
+    runtime.global_names["f"] =\
+        create_function(runtime, "f", ["x", "y"],
+            SExpr(Name("double"), SExpr(Name("+"), Name("x"), Name("y")))
+        )
+    runtime.global_names["+"] =\
+        Function("+", (lambda r, a, b: Integer(a.n + b.n)))
+    expr = SExpr(Name("f"), Integer(2), Integer(3))
+    assert expr.evaluate(runtime) == Integer(10)
