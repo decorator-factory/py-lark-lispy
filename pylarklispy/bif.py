@@ -93,3 +93,12 @@ def _(
     assert isinstance(fun, e.Function)
     named_fun = fun.with_name(name.e.identifier)
     return e.SExpr(e.Name("define"), name.e, named_fun)
+
+@_register("if")
+@e.Function.make("if", lazy=True)
+def _(runtime: e.Runtime, qcond: e.Quoted, then: e.Quoted, else_: e.Quoted) -> e.Entity:
+    cond = e.SExpr(e.Name("bool"), qcond.e).evaluate(runtime)
+    if cond == e.Atom("True"):
+        return then.e.evaluate(runtime)
+    else:
+        return else_.e.evaluate(runtime)
