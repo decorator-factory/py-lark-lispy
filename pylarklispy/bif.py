@@ -64,6 +64,5 @@ def _(runtime: e.Runtime, status: e.Integer = e.Integer(0)) -> e.Atom:
 @_register("define")
 @e.Function.make("define", lazy=True)
 def _(runtime: e.Runtime, name: e.Quoted[e.Name], value: e.Quoted[e.Entity]) -> e.Atom:
-    print(f"{name=!r} {value=!r}")
     runtime.global_frame.insert(name.e.identifier, value.e.evaluate(runtime))
     return e.Atom("Nil")
