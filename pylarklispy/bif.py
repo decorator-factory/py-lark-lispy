@@ -1,5 +1,5 @@
 import sys
-from typing import Dict
+from typing import Dict, NoReturn
 from . import entities as e
 
 
@@ -57,12 +57,39 @@ def _(runtime: e.Runtime, x: e.Entity) -> e.Atom:
 
 @_register("quit!")
 @e.Function.make("quit!")
-def _(runtime: e.Runtime, status: e.Integer = e.Integer(0)) -> e.Atom:
+def _(runtime: e.Runtime, status: e.Integer = e.Integer(0)) -> NoReturn:
+    print("Bye for now!")
     sys.exit(status.n)
-    return e.Atom("Nil")
 
 @_register("define")
 @e.Function.make("define", lazy=True)
 def _(runtime: e.Runtime, name: e.Quoted[e.Name], value: e.Quoted[e.Entity]) -> e.Atom:
     runtime.global_frame.insert(name.e.identifier, value.e.evaluate(runtime))
     return e.Atom("Nil")
+
+@_register("fun")
+@e.Function.make("fun", lazy=True)
+def _(
+        runtime: e.Runtime,
+        arg_names: e.Quoted[e.Vector[e.Name]],
+        body: e.Quoted[e.Entity]
+    ) -> e.Function:
+    return e.create_function(
+        outer_runtime=runtime,
+        name="~fun~",
+        arg_names=[name.identifier for name in arg_names.e.es],
+        body=body.e
+    )
+
+@_register("defun")
+@e.Function.make("defun", lazy=True)
+def _(
+        runtime: e.Runtime,
+        name: e.Quoted[e.Name],
+        arg_names: e.Quoted[e.Vector[e.Name]],
+        body: e.Quoted[e.Entity]
+    ) -> e.Entity:
+    fun = e.SExpr(e.Name("fun"), arg_names.e, body.e).evaluate(runtime)
+    assert isinstance(fun, e.Function)
+    named_fun = fun.with_name(name.e.identifier)
+    return e.SExpr(e.Name("define"), name.e, named_fun)
