@@ -1,6 +1,4 @@
-from typing import Callable, Dict, List, Mapping, Optional, Sequence, Tuple, Literal
-
-from typing_extensions import runtime
+from typing import Callable, Dict, Generic, Mapping, Optional, Sequence, Tuple, Literal, TypeVar
 
 """
 This module contains the classes that represent all the language
@@ -9,6 +7,7 @@ entities like S-Expr, Integer etc.
 An entity is an internal representation of a value or a computation.
 """
 
+E = TypeVar("E", bound="Entity")
 EvaluationStatus = Tuple[Literal["full", "partial"], "Entity"]
 
 
@@ -166,10 +165,10 @@ class Atom(Entity):
         return f"<Atom :{self.s}>"
 
 
-class Quoted(Entity):
+class Quoted(Entity, Generic[E]):
     __slots__ = ("e",)
 
-    def __init__(self, e: Entity):
+    def __init__(self, e: E):
         self.e = e
 
     def fmap(self, f):
