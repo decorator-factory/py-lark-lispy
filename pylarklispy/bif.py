@@ -1,3 +1,4 @@
+import sys
 from typing import Dict
 from . import entities as e
 
@@ -52,4 +53,17 @@ def _(runtime: e.Runtime, x: e.Entity) -> e.Atom:
 @e.Function.make("print!")
 def _(runtime: e.Runtime, x: e.Entity) -> e.Atom:
     print(x)
+    return e.Atom("Nil")
+
+@_register("quit!")
+@e.Function.make("quit!")
+def _(runtime: e.Runtime, status: e.Integer = e.Integer(0)) -> e.Atom:
+    sys.exit(status.n)
+    return e.Atom("Nil")
+
+@_register("define")
+@e.Function.make("define", lazy=True)
+def _(runtime: e.Runtime, name: e.Quoted[e.Name], value: e.Quoted[e.Entity]) -> e.Atom:
+    print(f"{name=!r} {value=!r}")
+    runtime.global_frame.insert(name.e.identifier, value.e.evaluate(runtime))
     return e.Atom("Nil")
