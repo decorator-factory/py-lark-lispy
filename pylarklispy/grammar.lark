@@ -1,6 +1,6 @@
 start: s_expr*
 
-expr: integer
+?expr: integer
     | string
     | atom
     | sigil_string
