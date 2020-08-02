@@ -1,4 +1,6 @@
-from typing import Callable, Dict, Mapping, Optional, Tuple, Literal
+from typing import Callable, Dict, List, Mapping, Optional, Tuple, Literal
+
+from typing_extensions import runtime
 
 """
 This module contains the classes that represent all the language
@@ -69,6 +71,9 @@ class Entity:
 
     def fmap(self, f: Callable[["Entity"], "Entity"]) -> "Entity":
         return f(self)
+
+    def call(self, runtime: Runtime, *args: "Entity") -> "Entity":
+        raise TypeError(f"Cannot call {self!r}")
 
     def compute(self, runtime: Runtime) -> "Entity":
         return self
@@ -303,3 +308,25 @@ class SigilString(Entity):
 
     def __repr__(self):
         return "<Sigil {self.sigil} {self.string!r}>"
+
+
+class Function(Entity):
+    __slots__ = ("name", "fn", "closure")
+
+    def __init__(
+        self,
+        name: str,
+        fn: Callable[[Runtime, List[Entity]], Entity],
+        closure: StackFrame
+    ):
+        self.name = name
+        self.fn = fn
+        self.closure = closure
+
+    def call(self, runtime: Runtime, *args: Entity) -> Entity:
+        computed_args = [arg.compute(runtime) for arg in args]
+        runtime.push(self.closure)
+        try:
+            return self.fn(runtime, computed_args)
+        finally:
+            runtime.pop()
