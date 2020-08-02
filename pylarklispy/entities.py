@@ -329,6 +329,12 @@ class Function(Entity):
         self.closure = closure
         self.lazy = lazy
 
+    @staticmethod
+    def make(name: str, *, lazy: bool = False):
+        def _(fn):
+            return Function(name, fn, lazy=lazy)
+        return _
+
     def with_name(self, name):
         return Function(name, self.fn, self.closure)
 
@@ -353,7 +359,7 @@ class Function(Entity):
         return f"<Function {self.name} {self.fn} {self.closure}>"
 
 
-def create_function(outer_runtime: Runtime, name: str, arg_names: Sequence[str], body: Entity, lazy: bool = False):
+def create_function(outer_runtime: Optional[Runtime], name: str, arg_names: Sequence[str], body: Entity, lazy: bool = False):
     """Create a new user-defined function and attaches
     a proper closure to it
     """
@@ -372,5 +378,9 @@ def create_function(outer_runtime: Runtime, name: str, arg_names: Sequence[str],
             return body.evaluate(runtime)
         finally:
             runtime.pop()
-    caller = Function(name, fun, closure=outer_runtime.current_frame, lazy=lazy)
+    if outer_runtime.current_frame:
+        closure = outer_runtime.current_frame
+    else:
+        closure = None
+    caller = Function(name, fun, closure=closure, lazy=lazy)
     return caller
