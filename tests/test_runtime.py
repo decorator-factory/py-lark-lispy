@@ -74,3 +74,11 @@ def test_custom_double_sum_function():
         Function("+", (lambda r, a, b: Integer(a.n + b.n)))
     expr = SExpr(Name("f"), Integer(2), Integer(3))
     assert expr.evaluate(runtime) == Integer(10)
+
+
+def test_lazy_identity_function():
+    runtime = Runtime({})
+    runtime.global_names["q"] =\
+        create_function(runtime, "q", ["x"], Name("x"), lazy=True)
+    assert SExpr(Name("q"), Integer(42)).evaluate(runtime) == Quoted(Integer(42))
+    assert SExpr(Name("q"), Name("w")).evaluate(runtime) == Quoted(Name("w"))

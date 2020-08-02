@@ -315,23 +315,29 @@ class SigilString(Entity):
 
 
 class Function(Entity):
-    __slots__ = ("name", "fn", "closure")
+    __slots__ = ("name", "fn", "closure", "lazy")
 
     def __init__(
         self,
         name: str,
         fn: Callable[..., Entity], # Runtime, *Entity -> Entity
-        closure: Optional[StackFrame] = None
+        closure: Optional[StackFrame] = None,
+        lazy: bool = False
     ):
         self.name = name
         self.fn = fn
         self.closure = closure
+        self.lazy = lazy
 
     def with_name(self, name):
         return Function(name, self.fn, self.closure)
 
     def call(self, runtime: Runtime, *args: Entity) -> Entity:
-        computed_args = [arg.compute(runtime) for arg in args]
+        if self.lazy:
+            computed_args = [Quoted(arg) for arg in args]
+        else:
+            computed_args = [arg.compute(runtime) for arg in args]
+
         if self.closure is not None:
             runtime.push(self.closure)
         try:
@@ -347,7 +353,10 @@ class Function(Entity):
         return f"<Function {self.name} {self.fn} {self.closure}>"
 
 
-def create_function(outer_runtime: Runtime, name: str, arg_names: Sequence[str], body: Entity):
+def create_function(outer_runtime: Runtime, name: str, arg_names: Sequence[str], body: Entity, lazy: bool = False):
+    """Create a new user-defined function and attaches
+    a proper closure to it
+    """
     def fun(runtime: Runtime, *args: Entity) -> Entity:
         nonlocal caller
         if len(args) != len(arg_names):
@@ -363,5 +372,5 @@ def create_function(outer_runtime: Runtime, name: str, arg_names: Sequence[str],
             return body.evaluate(runtime)
         finally:
             runtime.pop()
-    caller = Function(name, fun, closure=outer_runtime.current_frame)
+    caller = Function(name, fun, closure=outer_runtime.current_frame, lazy=lazy)
     return caller
