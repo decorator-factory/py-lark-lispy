@@ -1,4 +1,4 @@
-from typing import Callable, Dict, List, Mapping, Optional, Tuple, Literal
+from typing import Callable, Dict, List, Mapping, Optional, Sequence, Tuple, Literal
 
 from typing_extensions import runtime
 
@@ -13,7 +13,7 @@ EvaluationStatus = Tuple[Literal["full", "partial"], "Entity"]
 
 
 class StackFrame:
-    __slots__ = ("parent", "depth", "caller")
+    __slots__ = ("parent", "depth", "caller", "names")
 
     def __init__(self, parent: Optional["StackFrame"], depth: int, caller: str, names: Dict[str, "Entity"]):
         self.parent = parent
@@ -48,6 +48,10 @@ class Runtime:
             names=self.global_names
         )
         self.stack = [self.global_frame]
+
+    @property
+    def current_frame(self):
+        return self.stack[-1]
 
     def __getitem__(self, name: str) -> "Entity":
         return self.stack[-1].lookup(name)
@@ -200,7 +204,7 @@ class SExpr(Entity):
         return self.es == other.es
 
     def compute(self, runtime: Runtime) -> Entity:
-        raise NotImplementedError # TODO
+        return self.es[0].evaluate(runtime).call(runtime, *self.es[1:])
 
     def __str__(self):
         return "(" + " ".join(map(str, self.es)) + ")"
@@ -316,17 +320,48 @@ class Function(Entity):
     def __init__(
         self,
         name: str,
-        fn: Callable[[Runtime, List[Entity]], Entity],
-        closure: StackFrame
+        fn: Callable[..., Entity], # Runtime, *Entity -> Entity
+        closure: Optional[StackFrame] = None
     ):
         self.name = name
         self.fn = fn
         self.closure = closure
 
+    def with_name(self, name):
+        return Function(name, self.fn, self.closure)
+
     def call(self, runtime: Runtime, *args: Entity) -> Entity:
         computed_args = [arg.compute(runtime) for arg in args]
-        runtime.push(self.closure)
+        if self.closure is not None:
+            runtime.push(self.closure)
         try:
-            return self.fn(runtime, computed_args)
+            return self.fn(runtime, *computed_args).evaluate(runtime)
+        finally:
+            if self.closure is not None:
+                runtime.pop()
+
+    def __str__(self):
+        return f"<fun({self.name})[{self.fn}]>"
+
+    def __repr__(self):
+        return f"<Function {self.name} {self.fn} {self.closure}>"
+
+
+def create_function(outer_runtime: Runtime, name: str, arg_names: Sequence[str], body: Entity):
+    def fun(runtime: Runtime, *args: Entity) -> Entity:
+        nonlocal caller
+        if len(args) != len(arg_names):
+            raise ValueError(f"Got {len(args)} args, exprected {len(arg_names)}")
+        local_frame = StackFrame(
+            parent=runtime.current_frame,
+            depth=runtime.current_frame.depth + 1,
+            caller=repr(caller),
+            names=dict(zip(arg_names, args))
+        )
+        runtime.push(local_frame)
+        try:
+            return body.evaluate(runtime)
         finally:
             runtime.pop()
+    caller = Function(name, fun, closure=outer_runtime.current_frame)
+    return caller
