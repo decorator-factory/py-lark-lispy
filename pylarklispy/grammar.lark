@@ -16,9 +16,10 @@ vector: "[" expr* "]"
 string: ESCAPED_STRING
 atom: ":" IDENTIFIER
 name: IDENTIFIER
+integer: /[+-]?(0|[1-9][0-9]*)/
 
 
-IDENTIFIER: /(?![-0-9])[-+*\/%=<>_a-zA-Z0-9]+/
+IDENTIFIER: /(?![-0-9])[-+*\/%=<>_!a-zA-Z0-9]+/
 
 COMMENT: /#.*$/
 COMMA: ","
