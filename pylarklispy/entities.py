@@ -30,11 +30,13 @@ class StackFrame:
     def insert(self, name: str, value: "Entity", *, depth: int = 0):
         if depth < 0:
             raise LookupError(f"depth ({depth}) cannot be negative")
+
         if depth == 0:
             self.names[name] = value
-        if self.parent is None:
-            raise LookupError("Cannot go further; already in global scope")
-        self.parent.insert(name, value, depth=depth-1)
+        else:
+            if self.parent is None:
+                raise LookupError("Cannot go further; already in global scope")
+            self.parent.insert(name, value, depth=depth-1)
 
 
 class Runtime:
