@@ -1,4 +1,4 @@
-from typing import Callable, Dict, Generic, Mapping, Optional, Sequence, Tuple, Literal, TypeVar
+from typing import Callable, Dict, Generic, Mapping, Optional, Sequence, Tuple, TypeVar
 
 """
 This module contains the classes that represent all the language
@@ -8,12 +8,9 @@ An entity is an internal representation of a value or a computation.
 """
 
 E = TypeVar("E", bound="Entity")
-EvaluationStatus = Tuple[Literal["full", "partial"], "Entity"]
 
 
 class StackFrame:
-    __slots__ = ("parent", "depth", "caller", "names")
-
     def __init__(self, parent: Optional["StackFrame"], depth: int, caller: str, names: Dict[str, "Entity"]):
         self.parent = parent
         self.depth = depth
@@ -67,13 +64,6 @@ class Runtime:
 
 
 class Entity:
-    @property
-    def is_threadsafe(self):
-        """An entity is threadsafe if its `compute` method does not
-        depend on the runtime
-        """
-        return True
-
     def fmap(self, f: Callable[["Entity"], "Entity"]) -> "Entity":
         return f(self)
 
@@ -94,28 +84,8 @@ class Entity:
                 return state
             state = next_state
 
-    def evaluate_while_threadsafe(self, runtime: Runtime) -> EvaluationStatus:
-        """Like `evaluate`, but stops as soon as computing the next
-        step is not threadsafe.
-
-        If computataion was full, return ("full", <entity>)
-
-        If computataion was partial, return ("partial", <entity>)
-        """
-        state = self
-        while True:
-            if not state.is_threadsafe:
-                return ("partial", state)
-            # compute until the entity is final
-            next_state = state.compute(runtime)
-            if next_state is state:
-                return ("full", state)
-            state = next_state
-
 
 class Integer(Entity):
-    __slots__ = ("n",)
-
     def __init__(self, n: int):
         self.n = n
 
@@ -132,8 +102,6 @@ class Integer(Entity):
 
 
 class String(Entity):
-    __slots__ = ("s",)
-
     def __init__(self, s: str):
         self.s = s
 
@@ -141,7 +109,6 @@ class String(Entity):
         if not isinstance(other, String):
             return False
         return self.s == other.s
-
     def __str__(self):
         return repr(self.s)
 
@@ -150,8 +117,6 @@ class String(Entity):
 
 
 class Atom(Entity):
-    __slots__ = ("s",)
-
     def __init__(self, s: str):
         self.s = s
 
@@ -168,8 +133,6 @@ class Atom(Entity):
 
 
 class Quoted(Entity, Generic[E]):
-    __slots__ = ("e",)
-
     def __init__(self, e: E):
         self.e = e
 
@@ -189,10 +152,6 @@ class Quoted(Entity, Generic[E]):
 
 
 class SExpr(Entity):
-    __slots__ = ("es",)
-
-    is_threadsafe = False
-
     def __init__(self, *es: Entity):
         self.es = es
 
@@ -215,18 +174,12 @@ class SExpr(Entity):
 
 
 class Vector(Entity, Generic[E]):
-    __slots__ = ("es", "_computed")
-
     def __init__(self, *es: E, _computed: int = 0):
         self.es = es
         self._computed = _computed
 
     def fmap(self, f):
         return Vector(*(e.fmap(f) for e in self.es), _computed=0)
-
-    @property
-    def is_threadsafe(self):
-        return all(e.is_threadsafe for e in self.es)
 
     def __eq__(self, other):
         if not isinstance(other, Vector):
@@ -262,10 +215,6 @@ class Vector(Entity, Generic[E]):
 
 
 class Name(Entity):
-    __slots__ = ("identifier",)
-
-    is_threadsafe = False
-
     def __init__(self, identifier: str):
         self.identifier = identifier
 
@@ -285,10 +234,6 @@ class Name(Entity):
 
 
 class SigilString(Entity):
-    __slots__ = ("sigil", "string")
-
-    is_threadsafe = False
-
     def __init__(self, sigil: str, string: str):
         self.sigil = sigil
         self.string = string
@@ -316,8 +261,6 @@ class SigilString(Entity):
 
 
 class Function(Entity):
-    __slots__ = ("name", "fn", "closure", "lazy")
-
     def __init__(
         self,
         name: str,
@@ -379,7 +322,7 @@ def create_function(outer_runtime: Optional[Runtime], name: str, arg_names: Sequ
             return body.evaluate(runtime)
         finally:
             runtime.pop()
-    if outer_runtime.current_frame:
+    if outer_runtime is not None:
         closure = outer_runtime.current_frame
     else:
         closure = None
