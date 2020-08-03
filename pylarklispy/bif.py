@@ -113,7 +113,7 @@ def _(
 @_register("if")
 @e.Function.make("if", lazy=True)
 def _(runtime: e.Runtime, qcond: e.Quoted, then: e.Quoted, else_: e.Quoted) -> e.Entity:
-    condition = SExpr(Name("bool"), qcond.e).evaluate(runtime)
+    condition = e.SExpr(e.Name("bool"), qcond.e).evaluate(runtime)
     if condition == e.Atom("True"):
         return then.e.evaluate(runtime)
     else:
