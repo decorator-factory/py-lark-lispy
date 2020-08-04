@@ -82,3 +82,27 @@ def test_lazy_identity_function():
         create_function(runtime, "q", ["x"], Name("x"), lazy=True)
     assert SExpr(Name("q"), Integer(42)).evaluate(runtime) == Quoted(Integer(42))
     assert SExpr(Name("q"), Name("w")).evaluate(runtime) == Quoted(Name("w"))
+
+
+def test_equality():
+    assert Integer(100) == Integer(100)
+    assert Integer(100) != Integer(101)
+
+    assert String("hello") == String("hello")
+    assert String("hello") != String("Hello")
+
+    assert Atom("yay") == Atom("yay")
+    assert Atom("world") != Atom("wORlD")
+
+    assert Vector() == Vector()
+    assert Vector(Integer(1), Integer(2)) == Vector(Integer(1), Integer(2))
+    assert Vector(Integer(1), Integer(2)) != Vector(Integer(1))
+    assert Vector(Integer(1), Integer(2)) != Vector(Integer(1), Integer(3))
+
+    assert Integer(128) != String("128")
+
+
+def test_atom_colon():
+    with pytest.raises(ValueError):
+        Atom(":you-should-not-put-a-colon-when-creating-atoms-like-this")
+    Atom("do-it-like this")

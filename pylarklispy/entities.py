@@ -118,6 +118,8 @@ class String(Entity):
 
 class Atom(Entity):
     def __init__(self, s: str):
+        if s.startswith(":"):
+            raise ValueError(f"You accidentally put a : in the atom: {s}")
         self.s = s
 
     def __eq__(self, other):
