@@ -106,3 +106,23 @@ def test_atom_colon():
     with pytest.raises(ValueError):
         Atom(":you-should-not-put-a-colon-when-creating-atoms-like-this")
     Atom("do-it-like this")
+
+
+def test_call_the_uncallable():
+    with pytest.raises(TypeError, match=r".*[cC]an(not|n't) call.*"):
+        Integer(1).call( Runtime({}) )
+
+
+def test_sigil_strings_can_be_strings():
+    # the ~!"..." sigil will wrap the string in !!!...!!!
+
+    runtime = Runtime({
+        "sigil<!>": Function(
+            "sigil<!>",
+            lambda r, string: String("!!!" + string.s + "!!!")
+        )
+    })
+
+    result = SigilString("!", "attention").evaluate(runtime)
+
+    assert result == String("!!!attention!!!")
