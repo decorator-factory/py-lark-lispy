@@ -16,6 +16,12 @@ def run_ast(
         result = statement.evaluate(runtime)
     return (result, runtime)
 
+def compile_and_run(
+            code: str,
+            runtime: Optional[entities.Runtime]=None
+    ) -> Tuple[entities.Entity, entities.Runtime]:
+    return run_ast(compile_code(code), runtime=runtime)
+
 def repl():
     print("[REPL]")
     runtime = entities.Runtime(bif.index)
