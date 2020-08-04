@@ -13,14 +13,17 @@ def _register(name):
 
 @_register("+")
 @e.Function.make("+")
-def _(runtime: e.Runtime, a: e.Integer, b: e.Integer) -> e.Integer:
-    return e.Integer(a.n + b.n)
+def _(runtime: e.Runtime, *args: e.Integer) -> e.Integer:
+    return e.Integer(sum(arg.n for arg in args))
 
 
 @_register("*")
 @e.Function.make("*")
-def _(runtime: e.Runtime, a: e.Integer, b: e.Integer) -> e.Integer:
-    return e.Integer(a.n * b.n)
+def _(runtime: e.Runtime, *args: e.Integer) -> e.Integer:
+    product = 1
+    for arg in args:
+        product *= arg.n
+    return e.Integer(product)
 
 
 @_register("-")
@@ -55,6 +58,8 @@ def _(runtime: e.Runtime, x: e.Entity) -> e.Atom:
     elif x == e.Integer(0):
         return e.Atom("False")
     elif x == e.Vector():
+        return e.Atom("False")
+    elif x in [e.Atom("False"), e.Atom("None")]:
         return e.Atom("False")
     else:
         return e.Atom("True")
