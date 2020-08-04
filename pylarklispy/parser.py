@@ -1,5 +1,4 @@
 import json
-from os import stat
 from os.path import join, dirname, realpath
 
 import lark
