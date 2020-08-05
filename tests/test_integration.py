@@ -51,3 +51,17 @@ def test_sigils():
         ~!"attention"
     """)
     assert expr == e.String("!!!attention!!!")
+
+
+def test_loop():
+    expr = result("""
+        (defun factorial [n]
+            (loop [1 n]
+                (fun [acc x]
+                    (if x
+                        [:next   (* acc x) (- x 1)]
+                        [:return acc]))))
+
+        (factorial 10)
+    """)
+    assert expr == e.Integer(1 * 2 * 3 * 4 * 5 * 6 * 7 * 8 * 9 * 10)
