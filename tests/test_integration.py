@@ -39,7 +39,7 @@ def test_if():
 
 def test_bool():
     expr = result("""
-        [(bool ""), (bool 0), (bool []), (bool :False), (bool :None)]
+        [(bool ""), (bool 0), (bool []), (bool :False), (bool :Nil)]
     """)
     assert isinstance(expr, e.Vector)
     assert all([x == e.Atom("False") for x in expr.es])

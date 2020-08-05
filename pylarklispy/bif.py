@@ -59,7 +59,7 @@ def _(runtime: e.Runtime, x: e.Entity) -> e.Atom:
         return e.Atom("False")
     elif x == e.Vector():
         return e.Atom("False")
-    elif x in [e.Atom("False"), e.Atom("None")]:
+    elif x in [e.Atom("False"), e.Atom("Nil")]:
         return e.Atom("False")
     else:
         return e.Atom("True")
