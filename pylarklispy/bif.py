@@ -142,3 +142,81 @@ def _(runtime: e.Runtime, initial: e.Vector, fn: e.Function) -> e.Entity:
             if len(acc) != 1:
                 raise TypeError(f"Expected one argument after :return, got {len(acc)}")
             return acc[0]
+
+
+@_register("<")
+@e.Function.make("<")
+def _(runtime: e.Runtime, a: e.Integer, b: e.Integer) -> e.Atom:
+    if a.n < b.n:
+        return e.Atom("True")
+    else:
+        return e.Atom("False")
+
+
+@_register(">")
+@e.Function.make(">")
+def _(runtime: e.Runtime, a: e.Integer, b: e.Integer) -> e.Atom:
+    if a.n > b.n:
+        return e.Atom("True")
+    else:
+        return e.Atom("False")
+
+
+@_register("=")
+@e.Function.make("=")
+def _(runtime: e.Runtime, a: e.Entity, b: e.Entity) -> e.Atom:
+    if a == b:
+        return e.Atom("True")
+    else:
+        return e.Atom("False")
+
+
+@_register("/=")
+@e.Function.make("/=")
+def _(runtime: e.Runtime, a: e.Entity, b: e.Entity) -> e.Atom:
+    if a != b:
+        return e.Atom("True")
+    else:
+        return e.Atom("False")
+
+
+@_register(">=")
+@e.Function.make(">=")
+def _(runtime: e.Runtime, a: e.Entity, b: e.Entity):
+    return e.SExpr(e.Name("or"),
+            e.SExpr(e.Name(">"), a, b),
+            e.SExpr(e.Name("="), a, b))
+
+
+@_register("<=")
+@e.Function.make("<=")
+def _(runtime: e.Runtime, a: e.Entity, b: e.Entity):
+    return e.SExpr(e.Name("or"),
+            e.SExpr(e.Name("<"), a, b),
+            e.SExpr(e.Name("="), a, b))
+
+
+@_register("not")
+@e.Function.make("not")
+def _(runtime: e.Runtime, x: e.Entity):
+    return e.SExpr(e.Name("if"), x, e.Atom("False"), e.Atom("True"))
+
+
+@_register("and")
+@e.Function.make("and", lazy=True)
+def _(runtime: e.Runtime, *qxs: e.Quoted[e.Entity]):
+    for qx in qxs:
+        cond = e.SExpr(e.Name("bool"), qx.e).evaluate(runtime)
+        if cond == e.Atom("False"):
+            return cond
+    return e.Atom("True")
+
+
+@_register("or")
+@e.Function.make("or", lazy=True)
+def _(runtime: e.Runtime, *qxs: e.Quoted[e.Entity]):
+    for qx in qxs:
+        cond = e.SExpr(e.Name("bool"), qx.e).evaluate(runtime)
+        if cond == e.Atom("True"):
+            return cond
+    return e.Atom("False")
