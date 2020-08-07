@@ -243,3 +243,35 @@ def _(runtime: e.Runtime, module_name: e.String, path: e.String = e.String("")) 
         vector_guts += (e.Atom(k), v)
 
     return e.Vector(*vector_guts)
+
+
+@_register("+=")
+@e.Function.make("+=")
+def _(runtime: e.Runtime, target: e.Vector, source: e.Vector) -> e.Vector:
+    es = []
+    used_keys = []
+    for (k, v) in target.pairs():
+        for (k2, v2) in source.pairs():
+            if k2 == k:
+                es += (k2, v2)
+                used_keys.append(k2)
+                break
+        else:
+            es += (k, v)
+    for (k2, v2) in source.pairs():
+        if k2 not in used_keys:
+            es += (k2, v2)
+    return e.Vector(*es, _computed=len(es))
+
+
+@_register("-=")
+@e.Function.make("-=")
+def _(runtime: e.Runtime, target: e.Vector, keys: e.Vector) -> e.Vector:
+    es = []
+    for (k, v) in target.pairs():
+        for k2 in keys.es:
+            if k2 == k:
+                break
+        else:
+            es += (k, v)
+    return e.Vector(*es, _computed=len(es))

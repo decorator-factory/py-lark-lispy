@@ -1,4 +1,4 @@
-from typing import Callable, Dict, Generic, Mapping, Optional, Sequence, Tuple, TypeVar
+from typing import Callable, Dict, Generic, Iterable, Mapping, Optional, Sequence, Tuple, TypeVar, Union
 
 """
 This module contains the classes that represent all the language
@@ -188,24 +188,29 @@ class Vector(Entity, Generic[E]):
             return False
         return self.es == other.es
 
-    @property
-    def _is_mapping(self):
+    def i_am_a_mapping(self):
         if len(self.es) % 2 != 0:
-            return False
-        return all(isinstance(k, (String, Atom, Integer, Vector)) for k in self.es[::2])
+            raise TypeError(f"{self} is not a mapping")
+
+    def pairs(self):
+        self.i_am_a_mapping()
+        return zip(self.es[::2], self.es[1::2])
+
+    @staticmethod
+    def from_pairs(kvs: Iterable[Tuple[Entity, Entity]]) -> "Vector":
+        es = []
+        for k, v in kvs:
+            es += (k, v)
+        return Vector(*es)
 
     def call(self, runtime: Runtime, *keys: Entity):
-        if not self._is_mapping:
-            raise TypeError(f"{self} is not a mapping")
+        self.i_am_a_mapping()
         for key in keys:
-            if not isinstance(key, (String, Atom, Integer, Vector)):
-                continue
             key = key.evaluate(runtime)
-            for k, v in zip(self.es[::2], self.es[1::2]):
+            for k, v in self.pairs():
                 if k == key:
                     return v
         return Atom("Nil")
-
 
     def compute(self, runtime: Runtime) -> "Vector":
         if self._computed == len(self.es):

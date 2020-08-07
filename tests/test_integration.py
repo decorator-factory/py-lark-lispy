@@ -69,3 +69,13 @@ def test_loop():
 
 def test_interop():
     assert result('(interop "tests.my_interop")') == result('[:ping "pong"]')
+
+
+def test_add_keys():
+    expr = result("(+= [:hello 1, :world 2, :aaa 3] [:world 41, :bbb 42])")
+    assert expr == result("[:hello 1, :world 41, :aaa 3, :bbb 42]")
+
+
+def test_remove_keys():
+    expr = result("(-= [:hello 1, :world 2, :aaa 3] [:world, :bbb])")
+    assert expr == result("[:hello 1, :aaa 3]")
