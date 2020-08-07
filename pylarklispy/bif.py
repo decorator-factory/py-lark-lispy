@@ -1,5 +1,6 @@
 import importlib.util
 import importlib
+from os.path import realpath
 import sys
 from typing import Dict, NoReturn
 
@@ -275,3 +276,25 @@ def _(runtime: e.Runtime, target: e.Vector, keys: e.Vector) -> e.Vector:
         else:
             es += (k, v)
     return e.Vector(*es, _computed=len(es))
+
+
+@_register("at")
+@e.Function.make("at")
+def _(runtime: e.Runtime, vector: e.Vector, index: e.Integer):
+    if index.n >= len(vector.es):
+        raise ValueError(f"Index {index} too large for {vector}")
+    return vector.es[index.n]
+
+
+@_register("slice")
+@e.Function.make("slice")
+def _(runtime: e.Runtime, vector: e.Vector, a: e.Integer, b: e.Integer, c: e.Integer=e.Integer(1)):
+    return e.Vector(*vector.es[a.n:b.n:c.n])
+
+
+@_register("slice=")
+@e.Function.make("slice=")
+def _(runtime: e.Runtime, vector: e.Vector, a: e.Integer, b: e.Integer, source: e.Vector):
+    es = list(vector.es)
+    es[a.n:b.n] = source.es
+    return e.Vector(*es)

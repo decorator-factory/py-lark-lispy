@@ -79,3 +79,16 @@ def test_add_keys():
 def test_remove_keys():
     expr = result("(-= [:hello 1, :world 2, :aaa 3] [:world, :bbb])")
     assert expr == result("[:hello 1, :aaa 3]")
+
+
+def test_at():
+    assert result("(at [:zero :one :two :three :four] 3)") == result(":three")
+
+
+def test_slice_get():
+    assert result("(slice [0 1 2 3 4 5 6] 2 5)") == result("[2 3 4]")
+
+
+def test_slice_set():
+    assert result("(slice= [0 1 2 3 4 5 6] 2 5 [:a :b :c])") ==\
+           result("[0 1 :a :b :c 5 6]")
