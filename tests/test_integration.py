@@ -65,3 +65,7 @@ def test_loop():
         (factorial 10)
     """)
     assert expr == e.Integer(1 * 2 * 3 * 4 * 5 * 6 * 7 * 8 * 9 * 10)
+
+
+def test_interop():
+    assert result('(interop "tests.my_interop")') == result('[:ping "pong"]')

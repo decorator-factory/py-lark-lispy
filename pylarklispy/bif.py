@@ -1,5 +1,8 @@
+import importlib.util
+import importlib
 import sys
 from typing import Dict, NoReturn
+
 from . import entities as e
 
 
@@ -220,3 +223,23 @@ def _(runtime: e.Runtime, *qxs: e.Quoted[e.Entity]):
         if cond == e.Atom("True"):
             return cond
     return e.Atom("False")
+
+
+@_register("interop")
+@e.Function.make("interop")
+def _(runtime: e.Runtime, module_name: e.String, path: e.String = e.String("")) -> e.Vector:
+    if path.s == "":
+        module = importlib.import_module(module_name.s)
+    else:
+        spec = importlib.util.spec_from_file_location(module_name.s, path.s)
+        module = importlib.util.module_from_spec(spec)
+
+    if not hasattr(module, "interop"):
+        raise LookupError(f"module {module} doesn't define `interop`")
+
+    module_dict: Dict[str, e.Entity] = module.interop(runtime) # type: ignore
+    vector_guts = []
+    for k, v in module_dict.items():
+        vector_guts += (e.Atom(k), v)
+
+    return e.Vector(*vector_guts)
