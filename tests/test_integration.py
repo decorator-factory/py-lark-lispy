@@ -92,3 +92,19 @@ def test_slice_get():
 def test_slice_set():
     assert result("(slice= [0 1 2 3 4 5 6] 2 5 [:a :b :c])") ==\
            result("[0 1 :a :b :c 5 6]")
+
+
+def test_xpath():
+    expr = result("""
+        (define users
+            [:alice
+                [:name "Alice"
+                 :age 19]
+             :bob
+                [:name "Bob"
+                 :age 50]])
+
+        [(/> users [:alice :age])
+         (/> users [:bob :age])]
+    """)
+    assert expr == result("[19 50]")

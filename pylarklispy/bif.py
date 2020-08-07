@@ -282,7 +282,7 @@ def _(runtime: e.Runtime, target: e.Vector, keys: e.Vector) -> e.Vector:
 @e.Function.make("at")
 def _(runtime: e.Runtime, vector: e.Vector, index: e.Integer):
     if index.n >= len(vector.es):
-        raise ValueError(f"Index {index} too large for {vector}")
+        return e.Atom("Nil")
     return vector.es[index.n]
 
 
@@ -298,3 +298,12 @@ def _(runtime: e.Runtime, vector: e.Vector, a: e.Integer, b: e.Integer, source: 
     es = list(vector.es)
     es[a.n:b.n] = source.es
     return e.Vector(*es)
+
+
+@_register("/>")
+@e.Function.make("/>")
+def _(runtime: e.Runtime, vector: e.Vector, path: e.Vector):
+    acc = vector
+    for key in path.es:
+        acc = e.SExpr(acc, key)
+    return acc
