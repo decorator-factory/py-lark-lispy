@@ -188,6 +188,25 @@ class Vector(Entity, Generic[E]):
             return False
         return self.es == other.es
 
+    @property
+    def _is_mapping(self):
+        if len(self.es) % 2 != 0:
+            return False
+        return all(isinstance(k, (String, Atom, Integer, Vector)) for k in self.es[::2])
+
+    def call(self, runtime: Runtime, *keys: Entity):
+        if not self._is_mapping:
+            raise TypeError(f"{self} is not a mapping")
+        for key in keys:
+            if not isinstance(key, (String, Atom, Integer, Vector)):
+                continue
+            key = key.evaluate(runtime)
+            for k, v in zip(self.es[::2], self.es[1::2]):
+                if k == key:
+                    return v
+        return Atom("Nil")
+
+
     def compute(self, runtime: Runtime) -> "Vector":
         if self._computed == len(self.es):
             return self
