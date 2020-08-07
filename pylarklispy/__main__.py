@@ -16,7 +16,7 @@ def ellipsify(s: str):
 EXECUTABLE = ellipsify(argv[0])
 USAGE_STR = f"Usage: {EXECUTABLE} repl | run <filename> | runrepl <filename>"
 
-if len(argv) != 2:
+if len(argv) not in (2, 3):
     print(USAGE_STR)
     exit(1)
 
