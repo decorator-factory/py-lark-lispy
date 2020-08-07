@@ -22,9 +22,9 @@ def compile_and_run(
     ) -> Tuple[entities.Entity, entities.Runtime]:
     return run_ast(compile_code(code), runtime=runtime)
 
-def repl():
+def repl(runtime=None):
     print("[REPL]")
-    runtime = entities.Runtime(bif.index)
+    runtime = runtime or entities.Runtime(bif.index)
     while True:
         command = input("|> ")
         try:
