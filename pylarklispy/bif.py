@@ -324,3 +324,13 @@ def _(runtime: e.Runtime, bindings: e.Quoted[e.Vector], body: e.Quoted):
         body.e
     )
     return e.SExpr(iife, *values)
+
+
+@_register("do")
+@e.Function.make("do", lazy=True)
+def _(runtime: e.Runtime, *qexprs: e.Quoted):
+    acc = e.Atom("Nil")
+    for qexpr in qexprs:
+        expr = qexpr.e
+        acc = expr.evaluate(runtime)
+    return acc
