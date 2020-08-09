@@ -307,3 +307,20 @@ def _(runtime: e.Runtime, vector: e.Vector, path: e.Vector):
     for key in path.es:
         acc = e.SExpr(acc, key)
     return acc
+
+
+@_register("let")
+@e.Function.make("let", lazy=True)
+def _(runtime: e.Runtime, bindings: e.Quoted[e.Vector], body: e.Quoted):
+    # this code depends on dicts being ordered
+    names = []
+    values = []
+    for (k, v) in bindings.e.pairs():
+        names.append(k)
+        values.append(v)
+    iife = e.SExpr(
+        e.Name("fun"),
+        e.Vector(*names), # argument names
+        body.e
+    )
+    return e.SExpr(iife, *values)
