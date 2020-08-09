@@ -334,3 +334,9 @@ def _(runtime: e.Runtime, *qexprs: e.Quoted):
         expr = qexpr.e
         acc = expr.evaluate(runtime)
     return acc
+
+
+@_register("call")
+@e.Function.make("call")
+def _(runtime: e.Runtime, fn: e.Entity, argv: e.Vector):
+    return e.SExpr(fn, *argv.es)
