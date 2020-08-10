@@ -39,18 +39,21 @@ def interop(_runtime: e.Runtime):
     def _(r: e.Runtime, value: e.Entity):
         return Reference(value)
 
+
     @addf("set!")
     def _(r: e.Runtime, ref: Reference, value: e.Entity):
         ref.value = value
         return e.Atom("Nil")
 
+
     @addf("get!")
-    def _(r: e.Runtime, ref: Reference, value: e.Entity):
+    def _(r: e.Runtime, ref: Reference):
         return ref.value
+
 
     @addf("change!")
     def _(r: e.Runtime, ref: Reference, callable_: e.Entity):
-        new_value = callable_.call(r, ref.value)
+        new_value = callable_.call(r, ref.value).evaluate(r)
         ref.value = new_value
         return new_value
 

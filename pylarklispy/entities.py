@@ -166,7 +166,11 @@ class SExpr(Entity):
         return self.es == other.es
 
     def compute(self, runtime: Runtime) -> Entity:
-        return self.es[0].evaluate(runtime).call(runtime, *self.es[1:])
+        try:
+            return self.es[0].evaluate(runtime).call(runtime, *self.es[1:])
+        except TypeError as e:
+            print(f"Calling {self} resulted in TypeError: {e.args}")
+            raise RuntimeError from None
 
     def __str__(self):
         return "(" + " ".join(map(str, self.es)) + ")"
