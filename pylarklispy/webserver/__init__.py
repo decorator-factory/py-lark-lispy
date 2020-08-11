@@ -48,17 +48,17 @@ def interop(_runtime: e.Runtime):
     ):
         routes = web.RouteTableDef()
 
-        @routes.get('/')
-        async def hello(request):
-            return web.Response(text="Hello, world")
+        def connect_route(route: e.Vector):
+            method, name, fn = route.es
+            if not isinstance(method, (e.String, e.Atom)):
+                raise ValueError(f"{method} should be a string or an atom")
+            if not isinstance(name, e.String):
+                raise TypeError(f"Route name must be a string, not {name}.")
+            # we hope that `fn` is callable :-)
+            add_route = getattr(routes, method.s)(name.s)
 
-        for route, fn in route_table.pairs():
-            assert isinstance(route, e.String)
-            assert isinstance(fn, e.Function)
-
-            @routes.get(route.s)
-            async def route_stuff(request, fn=fn): # closure crap!
-
+            @add_route
+            def a_route(request):
                 @e.Function.make("<Request wrapper>")
                 def request_wrapper(rr: e.Runtime, a: e.Atom):
                     return e.String(request.match_info[a.s])
@@ -67,10 +67,18 @@ def interop(_runtime: e.Runtime):
                 assert isinstance(text, e.String)
                 return web.Response(text=text.s, content_type="text/html")
 
+        for row in route_table.es:
+            if not isinstance(row, e.Vector):
+                raise TypeError(f"Routing row must be a vector, got {row}")
+            connect_route(row)
+
         app = web.Application()
         app.add_routes(routes)
         web.run_app(app, host=host.s, port=port.n)
         return e.Atom("Nil")
+
+
+
 
     ###################################
     return index
