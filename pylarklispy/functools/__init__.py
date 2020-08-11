@@ -88,7 +88,7 @@ def interop(_runtime: e.Runtime):
         if not isinstance(llist, LinkedList):
             raise TypeError(f"Cannot (lmap ... {llist})")
         for x in llist:
-            fn.call(x).evaluate(r)
+            fn.call(r, x).evaluate(r)
         return e.Atom("Nil")
 
 
