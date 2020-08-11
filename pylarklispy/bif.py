@@ -350,7 +350,7 @@ def _(runtime: e.Runtime, fn: e.Entity, argv: e.Vector):
 
 @_register("import")
 @e.Function.make("import")
-def _(runtime: e.Runtime, module_name: e.String, param: e.Entity):
+def _(runtime: e.Runtime, module_name: e.String, param: e.Entity = e.Atom("all")):
     module_name = e.String(module_name.s.replace("$.", "pylarklispy."))
 
     if param == e.Atom("all"):
