@@ -4,7 +4,8 @@ class Index(dict):
     def add_function(self, name, rewrite: bool = False):
         def decorator(fn):
             entity = Function.make(name)(fn)
-            return self.add_value(name, entity, rewrite=rewrite)
+            self.add_value(name, entity, rewrite=rewrite)
+            return entity
         return decorator
 
     def add_value(self, name, value, rewrite: bool = False):
