@@ -102,3 +102,17 @@ def test_xpath():
          (/> users [:bob :age])]
     """)
     assert expr == result("[19 50]")
+
+
+def test_import():
+    expr1 = result("""
+        (import "tests.my_interop" :all)
+        ping
+    """)
+    assert expr1 == result('"pong"')
+
+    expr2 = result("""
+        (import "$.functools" [:only :map])
+        (map (fun [x] (+ x 1)) [1 2 3])
+    """)
+    assert expr2 == result('[2 3 4]')

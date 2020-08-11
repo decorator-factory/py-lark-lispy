@@ -1,6 +1,7 @@
 import importlib.util
 import importlib
 from os.path import realpath
+import pylarklispy
 import sys
 from typing import Dict, NoReturn
 
@@ -340,3 +341,35 @@ def _(runtime: e.Runtime, *qexprs: e.Quoted):
 @e.Function.make("call")
 def _(runtime: e.Runtime, fn: e.Entity, argv: e.Vector):
     return e.SExpr(fn, *argv.es)
+
+
+@_register("import")
+@e.Function.make("import")
+def _(runtime: e.Runtime, module_name: e.String, param: e.Entity):
+    module_name = e.String(module_name.s.replace("$.", "pylarklispy."))
+
+    if param == e.Atom("all"):
+        decider = lambda name: True
+    else:
+        if not isinstance(param, e.Vector):
+            raise TypeError('(import "module" <:all|[:except :a :b...]|[:only :a :b...]>)')
+        names = param.es[1:]
+        if param.es[0] == e.Atom("only"):
+            decider = lambda name: name in names
+        elif param.es[0] == e.Atom("except"):
+            decider = lambda name: name not in names
+        else:
+            raise TypeError('(import "module" <:all|[:except :a :b...]|[:only :a :b...]>)')
+
+    module = e.SExpr(e.Name("interop"), module_name).evaluate(runtime)
+    assert isinstance(module, e.Vector)
+
+    returned_map = []
+
+    for name, value in module.pairs():
+        if decider(name):
+            assert isinstance(name, e.Atom)
+            runtime.global_names[name.s] = value
+            returned_map += (name, value)
+
+    return e.Vector(*returned_map)
