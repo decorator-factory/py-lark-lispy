@@ -1,4 +1,3 @@
-import pytest
 import pylarklispy.parser as parser
 from pylarklispy.entities import *
 

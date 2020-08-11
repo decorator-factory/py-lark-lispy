@@ -1,12 +1,6 @@
-import pytest
-from pylarklispy import compile_and_run
 from pylarklispy import entities as e
+from tests.utils import result
 
-
-def result(code: str):
-    """Evaluate zero or more expressions from a stringly piece of code"""
-    expr, _ = compile_and_run(code)
-    return expr
 
 
 def test_arithmetics():
