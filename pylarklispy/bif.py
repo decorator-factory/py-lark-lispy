@@ -51,8 +51,13 @@ def _(runtime: e.Runtime, a: e.Integer, b: e.Integer) -> e.Integer:
 
 @_register("join")
 @e.Function.make("join")
-def _(runtime: e.Runtime, *strings: e.String) -> e.String:
-    return e.String("".join(s.s for s in strings))
+def _(runtime: e.Runtime, *xs: e.Entity) -> e.String:
+    pieces = []
+    for x in xs:
+        string = e.SExpr(e.Name("format"), x).evaluate(runtime)
+        assert isinstance(string, e.String)
+        pieces.append(string.s)
+    return e.String("".join(pieces))
 
 
 @_register("bool")
@@ -373,3 +378,12 @@ def _(runtime: e.Runtime, module_name: e.String, param: e.Entity):
             returned_map += (name, value)
 
     return e.Vector(*returned_map)
+
+
+@_register("format")
+@e.Function.make("format")
+def _(runtime: e.Runtime, x: e.Entity):
+    if isinstance(x, e.String):
+        return x
+    else:
+        return e.String(str(x))
