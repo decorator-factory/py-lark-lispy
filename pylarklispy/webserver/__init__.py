@@ -1,28 +1,13 @@
 from typing import *
 import pylarklispy.entities as e
+from ..interop_utils import Index
 
 def interop(_runtime: e.Runtime):
     from aiohttp import web
-    import asyncio
-
-    index = {}
-    index: Dict[str, e.Function] = {}
-    def _register(name):
-        def _(f):
-            index[name] = f
-            return f
-        return _
-
-    def addf(name):
-        def _(f):
-            entity_function = e.Function.make(name)(f)
-            _register(name)(entity_function)
-            return entity_function
-        return _
-
+    index = Index()
     ####################################
 
-    @addf("render")
+    @index.add_function("render")
     def _render(r: e.Runtime, obj):
         if isinstance(obj, e.String):
             return obj
@@ -54,7 +39,7 @@ def interop(_runtime: e.Runtime):
             assert False, f"bad obj: {obj}"
 
 
-    @addf("server")
+    @index.add_function("server")
     def _(
         r: e.Runtime,
         route_table: e.Vector,
@@ -86,7 +71,6 @@ def interop(_runtime: e.Runtime):
         app.add_routes(routes)
         web.run_app(app, host=host.s, port=port.n)
         return e.Atom("Nil")
-
 
     ###################################
     return index

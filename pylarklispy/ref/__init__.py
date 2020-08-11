@@ -1,57 +1,41 @@
 from typing import *
 import pylarklispy.entities as e
 from pylarklispy.entities import Entity
+from ..interop_utils import Index
+
+
+class Reference(Entity):
+    def __init__(self, value: e.Entity):
+        self.value: e.Entity = value
+
+    def __repr__(self):
+        return f"Reference({self.value!r})"
+
+    def __str__(self):
+        return f"(ref {self.value!s})"
+
 
 def interop(_runtime: e.Runtime):
-    from aiohttp import web
-    import asyncio
-
-    index = {}
-    index: Dict[str, e.Function] = {}
-    def _register(name):
-        def _(f):
-            index[name] = f
-            return f
-        return _
-
-    def addf(name):
-        def _(f):
-            entity_function = e.Function.make(name)(f)
-            _register(name)(entity_function)
-            return entity_function
-        return _
-
+    index = Index()
     ####################################
 
-
-    class Reference(Entity):
-        def __init__(self, value: e.Entity):
-            self.value: e.Entity = value
-
-        def __repr__(self):
-            return f"Reference({self.value!r})"
-
-        def __str__(self):
-            return f"(ref {self.value!s})"
-
-
-    @addf("make")
+    @index.add_function("make")
     def _(r: e.Runtime, value: e.Entity):
         return Reference(value)
 
 
-    @addf("set!")
+    @index.add_function("set!")
     def _(r: e.Runtime, ref: Reference, value: e.Entity):
         ref.value = value
         return e.Atom("Nil")
 
 
-    @addf("get!")
+    @index.add_function("get!")
     def _(r: e.Runtime, ref: Reference):
         return ref.value
 
 
-    @addf("change!")
+    @index.add_function("change!")
     def _(r: e.Runtime, ref: Reference, callable_: e.Entity):
         new_value = callable_.call(r, ref.value).evaluate(r)
         ref.value = new_value
