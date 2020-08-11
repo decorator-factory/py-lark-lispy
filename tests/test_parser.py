@@ -3,7 +3,7 @@ from pylarklispy.entities import *
 
 FULL_EXAMPLE = \
 """
-# This is a comment
+; This is a comment
 (hello world)
 (lorem :ipsum [dolor-sit amet])
 (quoted &ex &[pression])

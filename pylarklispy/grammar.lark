@@ -20,9 +20,9 @@ integer: /[+-]?(0|[1-9][0-9]*)/
 sigil_string: "~" IDENTIFIER ESCAPED_STRING
 
 
-IDENTIFIER: /(?!-?[0-9])[-+*\/%=<>_!?a-zA-Z0-9]+/
+IDENTIFIER: /(?![+-]?[0-9])[-+*\/%=<>_!?a-zA-Z0-9]+/
 
-COMMENT: /#.*/
+COMMENT: /;.*/
 COMMA: ","
 
 %import common.WS

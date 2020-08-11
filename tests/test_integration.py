@@ -5,11 +5,11 @@ from tests.utils import result
 
 def test_arithmetics():
     expr = result("""
-        (define x (+ 31 10 1))   # x = 31 + 10 + 1 = 42
-        (define y (* x 2 5))   # y = 42 * 10 = 420
-        (define z (- y (+ x 4))) # z = y - (x + 4) = 420 - 46 = 374
-        (define w (+ z -372)) # w = z + (-372) = 2
-        (define h (neg (** w 5))) # h = -(w**5) = -(2**5) = -32
+        (define x (+ 31 10 1))    ; x = 31 + 10 + 1 = 42
+        (define y (* x 2 5))      ; y = 42 * 10 = 420
+        (define z (- y (+ x 4)))  ; z = y - (x + 4) = 420 - 46 = 374
+        (define w (+ z -372))     ; w = z + (-372) = 2
+        (define h (neg (** w 5))) ; h = -(w**5) = -(2**5) = -32
         h
     """)
     assert expr == e.Integer(-32)
