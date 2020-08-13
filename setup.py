@@ -22,5 +22,6 @@ setuptools.setup(
         "lark-parser>=0.9.0",
         "pytest",
     ],
+    include_package_data=True,
     python_requires='>=3.6',
 )
