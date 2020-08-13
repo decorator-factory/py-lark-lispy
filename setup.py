@@ -22,7 +22,5 @@ setuptools.setup(
         "lark-parser>=0.9.0",
         "pytest",
     ],
-    package_data={'': ['pylarklispy/grammar.lark']},
-    include_package_data=True,
     python_requires='>=3.6',
 )
