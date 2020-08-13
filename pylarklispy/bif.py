@@ -78,7 +78,9 @@ def _(runtime: e.Runtime, x: e.Entity) -> e.Atom:
 @_register("print!")
 @e.Function.make("print!")
 def _(runtime: e.Runtime, x: e.Entity) -> e.Atom:
-    print(x)
+    st = e.SExpr(e.Name("format"), x).evaluate(runtime)
+    assert isinstance(st, e.String)
+    print(st.s)
     return e.Atom("Nil")
 
 
